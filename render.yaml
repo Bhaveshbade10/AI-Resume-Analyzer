@@ -1,5 +1,6 @@
-# Render Blueprint: deploy backend + PostgreSQL in one go
-# Push this repo to GitHub, then in Render: New > Blueprint > connect repo
+# Render Blueprint: one-click deploy for AI Resume Analyzer backend + PostgreSQL
+# Repo: https://github.com/Bhaveshbade10/AI-Resume-Analyzer
+# Deploy: Render Dashboard → New → Blueprint → connect this repo
 
 databases:
   - name: ai-resume-db
@@ -12,7 +13,9 @@ services:
     name: ai-resume-backend
     rootDir: backend
     buildCommand: npm install && npx prisma generate
-    startCommand: npm start
+    startCommand: node src/server.js
+    preDeployCommand: npx prisma db push
+    healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
