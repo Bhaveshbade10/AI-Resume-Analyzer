@@ -1,0 +1,50 @@
+// Prisma schema for AI Resume Analyzer
+// Run: npx prisma generate && npx prisma db push
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  resumes   Resume[]
+}
+
+model Resume {
+  id           String     @id @default(cuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resumeText   String     @db.Text
+  fileName     String?
+  score        Int?       // ATS compatibility score 0-100
+  skills       String[]   // Extracted skills (PostgreSQL array)
+  missingSkills String[]  // Missing skills from analysis
+  strengths    String[]   @default([])
+  weaknesses   String[]   @default([])
+  suggestions  String[]   @default([])
+  experienceLevel String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  jobMatches   JobMatch[]
+}
+
+model JobMatch {
+  id                    String   @id @default(cuid())
+  resumeId              String
+  resume                Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  jobDescription        String   @db.Text
+  matchScore            Float    // Match percentage 0-100
+  missingSkills         String[] @default([])
+  recommendedCourses    String[] @default([])
+  resumeImprovementTips String[] @default([])
+  createdAt             DateTime @default(now())
+}

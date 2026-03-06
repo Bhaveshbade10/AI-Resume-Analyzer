@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Env and secrets (never commit)
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+frontend/.next/
+backend/uploads/*.pdf
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo

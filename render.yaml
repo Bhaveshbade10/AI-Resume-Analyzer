@@ -1,0 +1,28 @@
+# Render Blueprint: deploy backend + PostgreSQL in one go
+# Push this repo to GitHub, then in Render: New > Blueprint > connect repo
+
+databases:
+  - name: ai-resume-db
+    databaseName: airesume
+    plan: free
+
+services:
+  - type: web
+    runtime: node
+    name: ai-resume-backend
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ai-resume-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: GROQ_API_KEY
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
