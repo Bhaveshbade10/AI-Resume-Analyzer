@@ -6,9 +6,9 @@ Do these in order. Total time: ~15 minutes.
 
 ## Prerequisites
 
-- GitHub account
+- GitHub account (repo already pushed, e.g. [Bhaveshbade10/AI-Resume-Analyzer](https://github.com/Bhaveshbade10/AI-Resume-Analyzer))
+- [Railway](https://railway.app) account (free tier)
 - [Vercel](https://vercel.com) account (free)
-- [Render](https://render.com) account (free tier)
 - Your **Groq API key** from [console.groq.com](https://console.groq.com)
 
 ---
@@ -32,36 +32,21 @@ If your repo is the whole **AI Resume Project** folder (parent of `ai-resume-ana
 
 ---
 
-## Step 2: Deploy backend + database on Render
+## Step 2: Deploy backend + database on Railway
 
-1. Go to [Render Dashboard](https://dashboard.render.com) → **New** → **Blueprint**.
-2. Connect your **GitHub** account and select the repo that contains `ai-resume-analyzer` (and `render.yaml` at the path shown below).
-3. **Blueprint file path:**  
-   - If repo root is `ai-resume-analyzer`: leave as `render.yaml`.  
-   - If repo root is the parent folder: set to `ai-resume-analyzer/render.yaml`.
-4. Click **Apply**.
-5. Render will create:
-   - A **PostgreSQL** database (`ai-resume-db`)
-   - A **Web Service** (`ai-resume-backend`)
-6. For the web service, you’ll be prompted for **secret** env vars:
-   - **GROQ_API_KEY:** paste your Groq API key.
-   - **CORS_ORIGIN:** leave empty for now (you’ll set it after deploying the frontend).
-7. Click **Create resources** and wait for the backend to build and deploy.
-8. After deploy, open your backend URL (e.g. `https://ai-resume-backend-xxxx.onrender.com`) and add `/health`. You should see `{"status":"ok",...}`.
-9. Run migrations once (from your machine, with production DB URL from Render):
-   - In Render: **ai-resume-backend** → **Environment** → copy **DATABASE_URL** (Internal).
-   - Locally:
-     ```bash
-     cd ai-resume-analyzer/backend
-     DATABASE_URL="<paste-internal-url>" npx prisma db push
-     ```
-   - Or in Render: **Shell** tab for the backend service and run:
-     ```bash
-     npx prisma db push
-     ```
-     (DATABASE_URL is already set there.)
+The backend has **Railway config** in `backend/railway.json` (build + start + healthcheck).
 
-**Note your backend URL** (e.g. `https://ai-resume-backend-xxxx.onrender.com`). No trailing slash.
+1. Go to [Railway](https://railway.app) → **New Project**.
+2. **Add PostgreSQL:** Click **+ New** → **Database** → **PostgreSQL**. Railway creates the DB and exposes `DATABASE_URL`.
+3. **Add backend from GitHub:** Click **+ New** → **GitHub Repo** → select your repo (e.g. **Bhaveshbade10/AI-Resume-Analyzer**).
+4. **Set Root Directory:** Backend service → **Settings** → **Root Directory** → set to **`backend`**. Save.
+5. **Link database:** Backend → **Variables** → **+ New** → **Add reference** → PostgreSQL → **`DATABASE_URL`**.
+6. **Add env vars** (Variables tab): `JWT_SECRET` (e.g. run `openssl rand -hex 32`), `GROQ_API_KEY`, `CORS_ORIGIN` (leave empty; set after Step 3), `NODE_ENV` = `production` (optional).
+7. **Generate domain:** Backend → **Settings** → **Networking** → **Generate Domain**. Copy the URL. No trailing slash.
+8. **Run migrations once:** Backend → open a deployment → **Shell** (or Railway CLI). Run: `npx prisma db push`.
+9. Open `https://your-backend-url/health` → `{"status":"ok",...}`.
+
+**Note your backend URL** (e.g. `https://....up.railway.app`). No trailing slash.
 
 ---
 
@@ -75,7 +60,7 @@ If your repo is the whole **AI Resume Project** folder (parent of `ai-resume-ana
    - **Build Command:** `npm run build` (default).
    - **Environment variables:** Add one:
      - **Name:** `NEXT_PUBLIC_API_URL`  
-     - **Value:** your backend URL from Step 2 (e.g. `https://ai-resume-backend-xxxx.onrender.com`)
+     - **Value:** your backend URL from Step 2 (e.g. `https://ai-resume-analyzer-backend-production-xxxx.up.railway.app`)
 4. Click **Deploy** and wait for the build to finish.
 5. **Note your frontend URL** (e.g. `https://ai-resume-analyzer-xxx.vercel.app`).
 
@@ -83,15 +68,15 @@ If your repo is the whole **AI Resume Project** folder (parent of `ai-resume-ana
 
 ## Step 4: Point backend to frontend (CORS)
 
-1. In Render → **ai-resume-backend** → **Environment**.
+1. In Railway → open your **backend service** → **Variables**.
 2. Set **CORS_ORIGIN** to your **exact** Vercel URL (e.g. `https://ai-resume-analyzer-xxx.vercel.app`). No trailing slash.
-3. Save. Render will redeploy the backend.
+3. Save. Railway will redeploy the backend automatically.
 
 ---
 
 ## Step 5: Verify
 
-- Backend: open `https://your-backend-url.onrender.com/health` → `{"status":"ok"}`.
+- Backend: open `https://your-backend-url/health` (your Railway URL) → `{"status":"ok"}`.
 - Frontend: open your Vercel URL → you see the app.
 - **Register** a new user → **Upload** a PDF resume → run **Analysis**.
 - Try **Job Matcher**, **Cover Letter**, **GitHub**, **Portfolio** to confirm they call the backend.
@@ -110,7 +95,7 @@ If your repo is the whole **AI Resume Project** folder (parent of `ai-resume-ana
 
 ## Notes
 
-- **Render free tier:** The backend may spin down after ~15 min of no traffic. The first request after that can take 30–60 seconds (cold start). Paid plans avoid this.
+- **Railway:** Free tier has a monthly usage limit; the backend stays warm so no long cold starts.
 - **Groq:** Use a valid API key; keep it secret and rotate if it was ever exposed.
 
 ## Troubleshooting
@@ -119,5 +104,5 @@ If your repo is the whole **AI Resume Project** folder (parent of `ai-resume-ana
 |-------|-----|
 | CORS errors in browser | Set backend `CORS_ORIGIN` to exact Vercel origin (no trailing slash). |
 | 401 / “Invalid token” | Frontend must use same backend URL in `NEXT_PUBLIC_API_URL`. |
-| DB connection failed | Use **Internal** Database URL for backend on Render; **External** if backend is elsewhere. |
+| DB connection failed | On Railway, ensure backend has a **reference** to PostgreSQL `DATABASE_URL`. Run `npx prisma db push` once. |
 | Build fails (Prisma) | Ensure build command includes `npx prisma generate`. |
