@@ -1,6 +1,6 @@
 /**
  * AI Resume Analyzer - Backend Server
- * Entry point: starts Express app and connects to DB
+ * Starts HTTP server first so healthcheck passes, then connects to DB
  */
 
 require('dotenv').config();
@@ -10,25 +10,11 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 4000;
 
-async function main() {
-  try {
-    await prisma.$connect();
-    console.log('✅ Database connected');
-  } catch (e) {
-    console.error('❌ Database connection failed:', e.message);
-    process.exit(1);
-  }
-
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running at http://localhost:${PORT}`);
-  });
-}
-
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+// Listen first so Railway/healthcheck can reach /health even if DB is not yet configured
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  // Connect to DB in background (don't block or exit so healthcheck succeeds)
+  prisma.$connect()
+    .then(() => console.log('✅ Database connected'))
+    .catch((e) => console.error('❌ Database connection failed:', e.message));
+});

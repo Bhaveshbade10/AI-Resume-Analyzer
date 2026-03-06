@@ -1,11 +1,18 @@
 /**
  * Groq API integration for resume analysis, job matching, and improvements
  * Uses LLaMA or Mixtral models via Groq
+ * Client is created lazily so server can start without GROQ_API_KEY (e.g. on Railway before vars are set).
  */
 
 const Groq = require('groq-sdk');
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+function getGroq() {
+  const key = process.env.GROQ_API_KEY;
+  if (!key || !key.trim()) {
+    throw new Error('GROQ_API_KEY environment variable is missing or empty. Set it in Railway Variables.');
+  }
+  return new Groq({ apiKey: key });
+}
 
 const MODEL = 'llama-3.3-70b-versatile'; // replacement for deprecated llama-3.1-70b-versatile
 
@@ -43,7 +50,7 @@ ${resumeText.slice(0, 12000)}
 
 Return only the JSON object.`;
 
-  const completion = await groq.chat.completions.create({
+  const completion = await getGroq().chat.completions.create({
     model: MODEL,
     messages: [{ role: 'user', content: prompt }],
     temperature: 0.3,
@@ -80,7 +87,7 @@ ${jobDescription.slice(0, 6000)}
 
 Return only the JSON object.`;
 
-  const completion = await groq.chat.completions.create({
+  const completion = await getGroq().chat.completions.create({
     model: MODEL,
     messages: [{ role: 'user', content: prompt }],
     temperature: 0.3,
@@ -112,7 +119,7 @@ ${resumeText.slice(0, 10000)}
 
 Return only the JSON object.`;
 
-  const completion = await groq.chat.completions.create({
+  const completion = await getGroq().chat.completions.create({
     model: MODEL,
     messages: [{ role: 'user', content: prompt }],
     temperature: 0.4,
@@ -147,7 +154,7 @@ ${linkedInText.slice(0, 10000)}
 
 Return only the JSON object.`;
 
-  const completion = await groq.chat.completions.create({
+  const completion = await getGroq().chat.completions.create({
     model: MODEL,
     messages: [{ role: 'user', content: prompt }],
     temperature: 0.3,
@@ -179,7 +186,7 @@ ${jobDescription.slice(0, 6000)}
 
 Return ONLY the cover letter text, no JSON, no "Cover Letter:" label. Start directly with the greeting (e.g. Dear Hiring Manager,).`;
 
-  const completion = await groq.chat.completions.create({
+  const completion = await getGroq().chat.completions.create({
     model: MODEL,
     messages: [{ role: 'user', content: prompt }],
     temperature: 0.5,
@@ -213,7 +220,7 @@ ${profileText.slice(0, 12000)}
 
 Return only the JSON object.`;
 
-  const completion = await groq.chat.completions.create({
+  const completion = await getGroq().chat.completions.create({
     model: MODEL,
     messages: [{ role: 'user', content: prompt }],
     temperature: 0.3,
@@ -247,7 +254,7 @@ ${portfolioText.slice(0, 12000)}
 
 Return only the JSON object.`;
 
-  const completion = await groq.chat.completions.create({
+  const completion = await getGroq().chat.completions.create({
     model: MODEL,
     messages: [{ role: 'user', content: prompt }],
     temperature: 0.3,
