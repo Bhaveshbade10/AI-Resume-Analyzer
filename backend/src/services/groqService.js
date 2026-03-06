@@ -1,7 +1,7 @@
 /**
  * Groq API integration for resume analysis, job matching, and improvements
  * Uses LLaMA or Mixtral models via Groq
- * Client is created lazily so server can start without GROQ_API_KEY (e.g. on Railway before vars are set).
+ * Client is created lazily so server can start without GROQ_API_KEY.
  */
 
 const Groq = require('groq-sdk');
@@ -9,7 +9,7 @@ const Groq = require('groq-sdk');
 function getGroq() {
   const key = process.env.GROQ_API_KEY;
   if (!key || !key.trim()) {
-    throw new Error('GROQ_API_KEY environment variable is missing or empty. Set it in Railway Variables.');
+    throw new Error('GROQ_API_KEY environment variable is missing or empty.');
   }
   return new Groq({ apiKey: key });
 }

@@ -16,7 +16,7 @@ A full-stack application that analyzes resumes with AI (Groq/LLaMA), matches the
 
 ```
 ai-resume-analyzer/
-├── frontend/                    # Next.js 14 app (deploy to Vercel)
+├── frontend/                    # Next.js 14 app
 │   ├── src/
 │   │   ├── app/
 │   │   │   ├── layout.tsx       # Root layout, Nav, AuthProvider
@@ -39,7 +39,7 @@ ai-resume-analyzer/
 │   │       └── api.ts           # All API calls (auth, upload, analyze, match, linkedin, improve)
 │   ├── .env.example             # NEXT_PUBLIC_API_URL
 │   └── package.json
-├── backend/                     # Express API (deploy to Render/Railway)
+├── backend/                     # Express API
 │   ├── prisma/
 │   │   └── schema.prisma        # User, Resume, JobMatch
 │   ├── src/
@@ -60,8 +60,7 @@ ai-resume-analyzer/
 │   ├── uploads/                 # Multer saves PDFs here (can delete after parsing)
 │   ├── .env.example
 │   └── package.json
-├── README.md
-└── DEPLOYMENT.md                # Vercel + Render/Railway steps
+└── README.md
 ```
 
 ## Setup
@@ -139,23 +138,6 @@ All routes except `/api/auth/*` and `/health` require header: `Authorization: Be
 3. **Job matcher** – Paste job description; match %, missing skills, courses, improvement tips.
 4. **Resume improvement** – Improved bullets, summary, action verbs, ATS tips.
 5. **LinkedIn analyzer** – Paste profile text; skills, branding score, profile strength, suggestions.
-
-## Deployment
-
-### Backend on Render (one-click)
-
-1. Go to [Render](https://render.com) → **New** → **Blueprint**.
-2. Connect repo **Bhaveshbade10/AI-Resume-Analyzer**. Render uses **render.yaml** to create PostgreSQL + backend.
-3. When prompted, set **GROQ_API_KEY** (from [Groq Console](https://console.groq.com)). Leave **CORS_ORIGIN** empty until the frontend is deployed.
-4. Click **Create resources**. After the first deploy, open `https://your-service.onrender.com/health` to verify.
-
-Full steps: **[HOST-ON-RENDER.md](./HOST-ON-RENDER.md)**.
-
-### Other options
-
-- **Frontend:** Deploy to [Vercel](https://vercel.com). Set `NEXT_PUBLIC_API_URL` to your backend URL.
-- **Backend on Railway:** See [RAILWAY-DEPLOY.md](./RAILWAY-DEPLOY.md) or [DEPLOYMENT.md](./DEPLOYMENT.md).
-- **CORS:** Set backend `CORS_ORIGIN` to your frontend URL (e.g. Vercel) when ready.
 
 ## License
 
